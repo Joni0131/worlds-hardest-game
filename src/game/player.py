@@ -1,5 +1,6 @@
 import pygame
 
+
 class Player:
     def __init__(self, x, y, width, height, vel=5, color=(255,0,0), deaths = 0):
         self.x = x
@@ -21,7 +22,8 @@ class Player:
             self.y -= self.vel
 
     def draw(self, screen):
-        pygame.draw.rect(screen, (0,0,0), (self.x-2, self.y-2, self.width+4, self.height+4))
+        pygame.draw.rect(screen, (0,0,0), (self.x-2, self.y-2, self.width+4, self.height+4), 2)
+        pygame.display.update()
         return pygame.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
 
     def reset(self):

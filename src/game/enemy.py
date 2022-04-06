@@ -11,8 +11,8 @@ class Enemy:
         self.right = right
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (0,0,0), (self.x, self.y), self.width+2, self.height+2)
-        return pygame.draw.circle(screen, self.color, (self.x, self.y), self.width, self.height)
+        pygame.draw.circle(screen, 0, (self.x, self.y), self.width+2, 2)
+        return pygame.draw.circle(screen, self.color, (self.x, self.y), self.width)
 
 
     def move(self, bound_x1, bound_x2):
