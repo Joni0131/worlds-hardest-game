@@ -1,12 +1,35 @@
-import pygame
+import tile
+import enemy
 
+
+# this class handles the state of the playing field except the player
 class Field:
-    def __init__(self, x, y, width, height, color=(0,255,0)):
+    # parameter x and y is the starting pixel
+    # parameter tileSize defines the length of an edge of a tile
+    # parameter enemyColor defines the enemy color
+    # parameter width and height define the number of tiles in that direction
+    def __init__(self, x, y, width, height, tileSize = 50, enemyColor = (0, 0, 255)):
         self.x = x
         self.y = y
+        self.tileSize = tileSize
+        self.enemyColor = enemyColor
+        # TODO check in the end if width and height are really needed
         self.width = width
         self.height = height
-        self.color = color
+        self.enemyRadius = tileSize * 0.3  # defines the radius of an enemy as 1/3 of the tileSize
+        self.field = [[]]  # list of list that keeps track of all tiles
+        self.enemy = []  # list that keeps track of all enemies
 
+    # define draw function
     def draw(self, screen):
-        return pygame.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
+        # call the drawing of all fields
+        for i in self.field:
+            for j in i:
+                j.draw(screen)
+        # draw all enemies
+        for i in self.enemy:
+            i.draw(screen)
+
+
+
+

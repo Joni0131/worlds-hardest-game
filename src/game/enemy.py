@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 
+
 class Enemy:
     def __init__(self, x, y, radius, speed, color):
         self.pos = (x, y)  # position as tuple
@@ -19,7 +20,6 @@ class Enemy:
         pygame.draw.circle(screen, 0, self.pos, self.radius, 1)
         # second fill the inner with the enemy color
         pygame.draw.circle(screen, self.color, self.pos, self.radius - 1)
-        return
 
     # this function adds a new Point to where the object is moving in order
     # calculate the needed velocities so calculation is done before runtime
@@ -34,6 +34,25 @@ class Enemy:
         self.velocitiesToPoint[-1] = velocity
         # calculate returning velocity the same way sign of aim - current
         velocity = tuple(np.sign(np.subtract(self.aimPoints[0], (x, y))) * self.speed)
+        # append returning velocity
+        self.velocitiesToPoint.append(velocity)
+
+    # this function adds multiple Points at once
+    # calculate the needed velocities so calculation is done before runtime
+    def addMovementPoints(self, pos):
+        # the calculation is the same as in addMovementPoint
+        # append the first point and overwrite the existing velocity
+        self.aimPoints.append(pos[0])
+        velocity = tuple(np.sign(np.subtract(pos[0], self.aimPoints[-2])) * self.speed)
+        # update last velocity
+        self.velocitiesToPoint[-1] = velocity
+        # by just appending the second to last velocity we do not calculate the velocity unnessaserily offten
+        for point in pos[1::]:
+            self.aimPoints.append(point)
+            velocity = tuple(np.sign(np.subtract(point, self.aimPoints[-2])) * self.speed)
+            self.velocitiesToPoint.append(velocity)
+        # but now we are still missing the last velocity
+        velocity = tuple(np.sign(np.subtract(self.aimPoints[0], pos[-1])) * self.speed)
         # append returning velocity
         self.velocitiesToPoint.append(velocity)
 
