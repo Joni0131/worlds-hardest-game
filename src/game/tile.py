@@ -14,6 +14,7 @@ class Tile:
         self.wall = False
 
     def draw(self, screen):
+        # IDEA optimize with return and order
         # iterate over all tiles so the color is alternating
         if sum(self.matPos) % 2 == 0:
             pg.draw.rect(screen, (247, 247, 255), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))

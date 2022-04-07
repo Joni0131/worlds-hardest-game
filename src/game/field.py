@@ -8,16 +8,15 @@ class Field:
     # parameter tileSize defines the length of an edge of a tile
     # parameter enemyColor defines the enemy color
     # parameter width and height define the number of tiles in that direction
-    def __init__(self, x, y, width, height, tileSize = 50, enemyColor = (0, 0, 255)):
+    def __init__(self, x, y, width, height, tileSize=50, enemyColor=(0, 0, 255)):
         self.x = x
         self.y = y
         self.tileSize = tileSize
         self.enemyColor = enemyColor
-        # TODO check in the end if width and height are really needed
         self.width = width
         self.height = height
         self.enemyRadius = tileSize * 0.3  # defines the radius of an enemy as 1/3 of the tileSize
-        self.field = [[]]  # list of list that keeps track of all tiles
+        self.field = [[None] * height] * width  # list of list that keeps track of all tiles as field[x][y]
         self.enemy = []  # list that keeps track of all enemies
 
     # define draw function
