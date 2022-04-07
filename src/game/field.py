@@ -1,5 +1,5 @@
-import tile
-import enemy
+from worlds_hardest_game.src.game.tile import Tile
+from worlds_hardest_game.src.game.enemy import Enemy
 
 
 # this class handles the state of the playing field except the player
