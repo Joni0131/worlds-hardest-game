@@ -64,6 +64,10 @@ class Writer:
             if char in name:
                 print("The character {char} is not allowed to be part of the fileName")
                 return False
+        # check that the file name starts with a lower case character
+        if not name[0].islower():
+            print("The first character has to be lower case")
+            return False
         return True
 
     # this function handles the asking for a new file name
@@ -89,3 +93,24 @@ class Writer:
     def writeEnemy(self, fp):
         return
 
+    # Imports of Level class
+    # from worlds_hardest_game.src.game.field import Field
+    # from worlds_hardest_game.src.game.enemy import Enemy
+    # from worlds_hardest_game.src.game.tile import Tile
+    #
+    # Needed attributes of Level class:
+    # field
+    # windowWidth
+    # windowHeight
+    # xStart
+    # yStart
+    # numberOfTilesWidth
+    # numberOfTilesHeight
+    # tileSize
+    # enemyColor
+    #
+    # Functions of Level class:
+    # __init__(self) set all attributes
+    # draw call to field
+    # setTiles called in __init__ as function for easier implementation
+    # setEnemies called in __init__ as function for easier implementation

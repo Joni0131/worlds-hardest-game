@@ -30,6 +30,12 @@ class Field:
         for i in self.enemy:
             i.draw(screen)
 
+    # a function that calls the move update for all enemies
+    def move(self):
+        for x in self.enemy:
+            x.move()
+
+
 
 
 
