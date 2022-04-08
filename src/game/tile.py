@@ -26,6 +26,9 @@ class Tile:
         # set color for out of bounds
         if self.outOfBounds:
             pg.draw.rect(screen, (180, 181, 254), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+        # if it is a wall draw them as well
+        if self.wall:
+            self.drawEdges(screen)
 
     def drawEdges(self, screen):
         # draw the given edges
@@ -33,17 +36,13 @@ class Tile:
         width = 1  # width is 1 pixel
         # draw north edge
         if self.edges[0]:
-            self.wall = True
             pg.draw.line(screen, color, self.pixelPos, (self.pixelPos[0] + self.size, self.pixelPos[1]), width)
         # draw east edge:
         if self.edges[1]:
-            self.wall = True
             pg.draw.line(screen, color, (self.pixelPos[0] + self.size, self.pixelPos[1]), (self.pixelPos[0] + self.size, self.pixelPos[1] + self.size), width)
         # draw south edge:
         if self.edges[2]:
-            self.wall = True
             pg.draw.line(screen, color, (self.pixelPos[0], self.pixelPos[1] + self.size), (self.pixelPos[0] + self.size, self.pixelPos[1] + self.size), width)
         # draw west edge:
         if self.edges[3]:
-            self.wall = True
             pg.draw.line(screen, color, self.pixelPos[0], (self.pixelPos[0], self.pixelPos[1] + self.size), width)
