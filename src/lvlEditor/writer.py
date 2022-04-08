@@ -3,7 +3,7 @@ from worlds_hardest_game.src.game.tile import Tile
 from worlds_hardest_game.src.game.enemy import Enemy
 from worlds_hardest_game.src.game.field import Field
 
-
+# IDEA create predefined lvl class and just fill it. would reduce complexity of the writer not necessary right now
 # this class uses the information of the editor to generate a new python file that represents the lvl
 class Writer:
 
@@ -25,6 +25,8 @@ class Writer:
         self.field = field
         self.windowWidth = windowWidth
         self.windowHeight = windowHeight
+        # start the writing process
+        self.prepareField()
 
     # open the file for write access if the file already exists ask if it should be overwritten or give a new name
     # then start writing
@@ -41,10 +43,11 @@ class Writer:
             # if yes just continue to open as write
             if userInput == 'Y':
                 break
-            # if not ask for new file name and update path
+            # if not ask for new file name
             if userInput == 'N':
                 self.askForNewFileName()
-                self.filePath = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, ("lvl/" + self.lvlName + ".py"))
+        print('Start saving process')
+        print(self.lvlName)
         # open file path with writing access if the file doesn't exist it is created
         fp = open(self.filePath, 'w')
         # start the writing process
@@ -69,7 +72,7 @@ class Writer:
         # iterate over all illegal chas and check if any is part of the name
         for char in illegalChars:
             if char in name:
-                print("The character {char} is not allowed to be part of the fileName")
+                print(f"The character {char} is not allowed to be part of the fileName")
                 return False
         # check that the file name starts with a lower case character
         if not name[0].islower():
@@ -84,7 +87,11 @@ class Writer:
         newName = input()
         # verify that it is a valid name if not ask again
         if self.validFileName(newName):
+            print(newName)
+            # set new name
             self.lvlName = newName
+            # update file path
+            self.filePath = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, ("lvl/" + self.lvlName + ".py"))
         else:
             self.askForNewFileName()
 

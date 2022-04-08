@@ -10,7 +10,7 @@ class Tile:
         self.safe = False
         self.goal = False
         self.outOfBounds = False
-        self.edges = [0, 0, 0, 0]  # Defined as Flags as [N, E, S, W]
+        self.edges = [False, False, False, False]  # Defined as Flags as [N, E, S, W]
         self.wall = False
 
     def draw(self, screen):
@@ -31,25 +31,26 @@ class Tile:
             self.drawEdges(screen)
 
     def drawEdges(self, screen):
+        # IDEA width 1 doesn't look that nice change for a better width but has to change strat and end pixel offset
         # draw the given edges
         color = 0  # color is black
         width = 1  # width is 1 pixel
         # draw north edge
         if self.edges[0]:
-            pg.draw.line(screen, color, self.pixelPos, (self.pixelPos[0] + self.size, self.pixelPos[1]), width)
+            pg.draw.line(screen, color, self.pixelPos, (self.pixelPos[0] + self.size - 1, self.pixelPos[1]), width)
         # draw east edge:
         if self.edges[1]:
-            pg.draw.line(screen, color, (self.pixelPos[0] + self.size, self.pixelPos[1]), (self.pixelPos[0] + self.size, self.pixelPos[1] + self.size), width)
+            pg.draw.line(screen, color, (self.pixelPos[0] + self.size - 1, self.pixelPos[1]), (self.pixelPos[0] + self.size - 1, self.pixelPos[1] + self.size - 1), width)
         # draw south edge:
         if self.edges[2]:
-            pg.draw.line(screen, color, (self.pixelPos[0], self.pixelPos[1] + self.size), (self.pixelPos[0] + self.size, self.pixelPos[1] + self.size), width)
+            pg.draw.line(screen, color, (self.pixelPos[0], self.pixelPos[1] + self.size - 1), (self.pixelPos[0] + self.size - 1, self.pixelPos[1] + self.size - 1), width)
         # draw west edge:
         if self.edges[3]:
-            pg.draw.line(screen, color, self.pixelPos[0], (self.pixelPos[0], self.pixelPos[1] + self.size), width)
+            pg.draw.line(screen, color, self.pixelPos, (self.pixelPos[0], self.pixelPos[1] + self.size - 1), width)
 
     # this function resets all flags expect the outOfBounds
     def reset(self):
         self.safe = False
         self.goal = False
-        self.edges = [0, 0, 0, 0]  # Defined as Flags as [N, E, S, W]
+        self.edges = [False, False, False, False]  # Defined as Flags as [N, E, S, W]
         self.wall = False

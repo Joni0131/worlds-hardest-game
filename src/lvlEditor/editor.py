@@ -1,6 +1,7 @@
 import pygame
 from worlds_hardest_game.src.game.field import Field
 from worlds_hardest_game.src.game.enemy import Enemy
+from worlds_hardest_game.src.lvlEditor.writer import Writer
 import numpy as np
 import stringFormat
 from time import sleep
@@ -170,8 +171,6 @@ class Editor:
 
     # this method setsSupported Actions and the corresponding keys
     def setModes(self):
-        # append save
-        self.modes.append(('Save', pygame.K_s))
         # append change tile outOfBounds / playable
         self.modes.append(('ChangeTile', pygame.K_c))
         # append detectEdges
@@ -184,6 +183,8 @@ class Editor:
         self.modes.append(('NewEnemy', pygame.K_e))
         # append setLastEnemyAim
         self.modes.append(('EnemyMovement', pygame.K_m))
+        # append save
+        self.modes.append(('Save', pygame.K_s))
 
     # this method handles the different mode functionalities
     def running(self):
@@ -192,7 +193,7 @@ class Editor:
         # calculate how long to wait by dividing 1000 ms / fps because function needs int round it
         delay = int(1000 / fps)
         # keep track off the current mode and init is to change tiles
-        currentMode = self.modes[1][1]
+        currentMode = self.modes[0][1]
         # keep the editor running until the save mode has been accessed
         while True:
             # add a pygame delay so the game is not always updating
@@ -217,37 +218,37 @@ class Editor:
             if currentMode == -1:
                 break
             # save mode
-            elif currentMode == self.modes[0][1]:
-                # TODO call writer and then break the loop
+            elif currentMode == self.modes[6][1]:
+                self.safeFile()
                 break
             # change tile mode outOfBound / playable
-            elif currentMode == self.modes[1][1]:
+            elif currentMode == self.modes[0][1]:
                 # only if clicked
                 if click:
                     self.changeTile()
             # find and walls mode
-            elif currentMode == self.modes[2][1]:
+            elif currentMode == self.modes[1][1]:
                 self.setWalls()
             # set safeTiles mode
-            elif currentMode == self.modes[3][1]:
+            elif currentMode == self.modes[2][1]:
                 # only if clicked
                 if click:
                     self.setSafe()
             # set goal Tiles mode
-            elif currentMode == self.modes[4][1]:
+            elif currentMode == self.modes[3][1]:
                 # only if clicked
                 if click:
                     self.setGoal()
             # add newEnemy mode
-            elif currentMode == self.modes[5][1]:
+            elif currentMode == self.modes[4][1]:
                 # only if clicked
                 if click:
                     self.createNewEnemy()
             # add movementPoint to enemy mode
-            elif currentMode == self.modes[6][1]:
+            elif currentMode == self.modes[5][1]:
                 # only if clicked
                 if click:
-                    # TODO do this and draw a enemy on the point with a alpha value
+                    # IDEA do this and draw a enemy on the point with a alpha value not trivial only surface object has alpha value
                     self.addMovementPoint()
             # if nothing or something unexpected happened don't draw
             else:
@@ -268,7 +269,50 @@ class Editor:
 
     # this method finds all theoretical walls
     def setWalls(self):
-        pass
+        # IDEA if it is to slow improve algorithm
+        # because the game does not consists of that many tiles it is valid to just iterate over all tiles
+        # corners can be skipped because it is impossible to have a wall
+        # edges only need to check one side because the other three are outOfBounds by convention
+        for i in range(0, self.numberOfTilesWidth):
+            for j in range(0, self.numberOfTilesHeight):
+                # only check if tile is outOfBounds
+                if not self.field.field[i][j].outOfBounds:
+                    continue
+                # check only certain tiles if at edge fewer of course
+                if i == 0:
+                    # is a corner
+                    if j == 0 or j == self.numberOfTilesHeight - 1:
+                        continue
+                    # is left boarder
+                    else:
+                        # set edge flag if side is not out of bound
+                        self.field.field[i][j].edges[1] = not self.field.field[i+1][j].outOfBounds
+                elif i == self.numberOfTilesWidth - 1:
+                    # is a corner
+                    if j == 0 or j == self.numberOfTilesHeight - 1:
+                        continue
+                    # is right boarder
+                    else:
+                        # set edge flag if side is not out of bound
+                        self.field.field[i][j].edges[3] = not self.field.field[i-1][j].outOfBounds
+                else:
+                    # is upper boarder
+                    if j == 0:
+                        # set edge flag if side is not out of bound
+                        self.field.field[i][j].edges[2] = not self.field.field[i][j+1].outOfBounds
+                    # is lower boarder
+                    elif j == self.numberOfTilesHeight - 1:
+                        # set edge flag if side is not out of bound
+                        self.field.field[i][j].edges[0] = not self.field.field[i][j-1].outOfBounds
+                    # is middle
+                    else:
+                        # we have to check all sides
+                        self.field.field[i][j].edges[0] = not self.field.field[i][j-1].outOfBounds
+                        self.field.field[i][j].edges[1] = not self.field.field[i+1][j].outOfBounds
+                        self.field.field[i][j].edges[2] = not self.field.field[i][j+1].outOfBounds
+                        self.field.field[i][j].edges[3] = not self.field.field[i-1][j].outOfBounds
+                # set tile is wall if any edge has been set
+                self.field.field[i][j].wall = any(self.field.field[i][j].edges)
 
     # this methode changes the goal from a tile the courser is on
     def setGoal(self):
@@ -335,7 +379,13 @@ class Editor:
         if xIdx <= 0 or yIdx <= 0 or xIdx >= self.numberOfTilesWidth - 1 or yIdx >= self.numberOfTilesHeight - 1:
             return -1, -1
         return xIdx, yIdx
-    # TODO all this
+
+    # this method handles the file saving process
+    def safeFile(self):
+        print("Please input level name.")
+        lvlName = input()
+        Writer(lvlName, self.field, self.screenWidth, self.screenHeight)
+
     # plan for editor:
     # first init a field of playable tiles width = 20 height = 10
     # that means in reality there are 22*12 tiles
@@ -352,5 +402,5 @@ class Editor:
             # ask for initial level name
     # close editor
 
-
+    # TODO think if tis ok to have multiple enemies at the same point
 e = Editor()
