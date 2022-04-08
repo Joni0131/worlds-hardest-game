@@ -46,3 +46,10 @@ class Tile:
         # draw west edge:
         if self.edges[3]:
             pg.draw.line(screen, color, self.pixelPos[0], (self.pixelPos[0], self.pixelPos[1] + self.size), width)
+
+    # this function resets all flags expect the outOfBounds
+    def reset(self):
+        self.safe = False
+        self.goal = False
+        self.edges = [0, 0, 0, 0]  # Defined as Flags as [N, E, S, W]
+        self.wall = False

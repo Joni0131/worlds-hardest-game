@@ -17,9 +17,9 @@ class Enemy:
     # draw the enemy at the current position
     def draw(self, screen):
         # first draw the line around the enemy in black
-        pygame.draw.circle(screen, 0, self.pos, self.radius, 1)
+        pygame.draw.circle(screen, 0, self.pos, self.radius, 3)
         # second fill the inner with the enemy color
-        pygame.draw.circle(screen, self.color, self.pos, self.radius - 1)
+        pygame.draw.circle(screen, self.color, self.pos, self.radius - 3)
 
     # this function adds a new Point to where the object is moving in order
     # calculate the needed velocities so calculation is done before runtime

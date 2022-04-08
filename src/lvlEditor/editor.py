@@ -1,12 +1,14 @@
 import pygame
 from worlds_hardest_game.src.game.field import Field
+from worlds_hardest_game.src.game.enemy import Enemy
+import numpy as np
 import stringFormat
 from time import sleep
 
 
 class Editor:
 
-    def __init__(self, screenWidth=-1, screenHeight=-1, xOff=-1, yOff=-1, numberOfPlayableTilesWidth=20, numberOfPlayableTilesHeight=10, tileSize=50, enemyColor=(0, 0, 255)):
+    def __init__(self, screenWidth=-1, screenHeight=-1, xOff=-1, yOff=-1, numberOfPlayableTilesWidth=20, numberOfPlayableTilesHeight=10, tileSize=50, enemySpeed=5, enemyColor=(0, 0, 255)):
         # check that the field has a minimum of 2 tiles and the tile is at least 9*9 pixel
         if not (numberOfPlayableTilesWidth > 0 and numberOfPlayableTilesHeight > 0 and tileSize > 9 and numberOfPlayableTilesHeight * numberOfPlayableTilesWidth >= 2):
             raise Exception('Invalid field sizes.')
@@ -41,15 +43,19 @@ class Editor:
         # save constant parameters
         self.enemyColor = enemyColor
         self.tileSize = tileSize
+        self.enemySpeed = enemySpeed
+        # set enemy radius as as percentege of tileSizee
+        self.enemyRadius = int((tileSize // 2) * 0.6)
         # set number of created tiles
         self.numberOfTilesWidth = numberOfPlayableTilesWidth + 2
         self.numberOfTilesHeight = numberOfPlayableTilesHeight + 2
-        # prepare empty variable for screen, font, modes, modeText, field
+        # prepare empty variable for screen, font, modes, modeText, field, lastEnemyAims
         self.screen = None
         self.font = None
         self.modes = []
         self.modeText = None
         self.field = None
+        self.lastEnemyAims = []
         # start the editor
         self.startEditor()
 
@@ -59,9 +65,8 @@ class Editor:
         pygame.init()
         # init the screen
         self.initScreen()
-        # handle different action depending on mode add for loop
-        # TODO
-        sleep(60)
+        # start the real editor
+        self.running()
         # stop pygame
         pygame.quit()
 
@@ -75,6 +80,9 @@ class Editor:
         self.screen.blit(self.modeText, (5, 5))
         # draw field
         self.field.draw(self.screen)
+        # draw last movementpoints of an enemy
+        for i in self.lastEnemyAims:
+            i.draw(self.screen)
         # update screen
         pygame.display.update()
 
@@ -166,17 +174,167 @@ class Editor:
         self.modes.append(('Save', pygame.K_s))
         # append change tile outOfBounds / playable
         self.modes.append(('ChangeTile', pygame.K_c))
-        # append setStart
-        self.modes.append(('StartTile', pygame.K_a))
+        # append detectEdges
+        self.modes.append(('CreateWalls', pygame.K_w))
+        # append setSafe
+        self.modes.append(('SafeTile', pygame.K_a))
         # append setGoal
         self.modes.append(('GoalTile', pygame.K_g))
         # append setEnemyStart
         self.modes.append(('NewEnemy', pygame.K_e))
         # append setLastEnemyAim
         self.modes.append(('EnemyMovement', pygame.K_m))
-        # append detectEdges
-        self.modes.append(('CreateEdges', pygame.K_w))
 
+    # this method handles the different mode functionalities
+    def running(self):
+        # set roughly the speed for the game in frames per second
+        fps = 30
+        # calculate how long to wait by dividing 1000 ms / fps because function needs int round it
+        delay = int(1000 / fps)
+        # keep track off the current mode and init is to change tiles
+        currentMode = self.modes[1][1]
+        # keep the editor running until the save mode has been accessed
+        while True:
+            # add a pygame delay so the game is not always updating
+            pygame.time.delay(delay)
+            # set flag if mouse was pressed
+            click = False
+            # get all pressed keys on this frame
+            events = pygame.event.get()
+            # iterate over all events
+            for event in events:
+                # detect pressed key event and record key
+                if event.type == pygame.KEYDOWN:
+                    currentMode = event.key
+                # detect click and remember it has been clicked
+                if event.type == pygame.MOUSEBUTTONUP:
+                    click = True
+                # detect if window has been closed
+                if event.type == pygame.QUIT:
+                    currentMode = -1
+            # python seems like it is not supporting switch cases so do it as if ... elif ...
+            # window close
+            if currentMode == -1:
+                break
+            # save mode
+            elif currentMode == self.modes[0][1]:
+                # TODO call writer and then break the loop
+                break
+            # change tile mode outOfBound / playable
+            elif currentMode == self.modes[1][1]:
+                # only if clicked
+                if click:
+                    self.changeTile()
+            # find and walls mode
+            elif currentMode == self.modes[2][1]:
+                self.setWalls()
+            # set safeTiles mode
+            elif currentMode == self.modes[3][1]:
+                # only if clicked
+                if click:
+                    self.setSafe()
+            # set goal Tiles mode
+            elif currentMode == self.modes[4][1]:
+                # only if clicked
+                if click:
+                    self.setGoal()
+            # add newEnemy mode
+            elif currentMode == self.modes[5][1]:
+                # only if clicked
+                if click:
+                    self.createNewEnemy()
+            # add movementPoint to enemy mode
+            elif currentMode == self.modes[6][1]:
+                # only if clicked
+                if click:
+                    # TODO do this and draw a enemy on the point with a alpha value
+                    self.addMovementPoint()
+            # if nothing or something unexpected happened don't draw
+            else:
+                continue
+            # redraw display
+            self.draw()
+
+    # this methode changes the outOfBoundsValue from a tile and set everything else to the initial parameters the courser is on
+    def changeTile(self):
+        # get courser position
+        (x, y) = self.position()
+        # check the position is valid if not just do nothing
+        if x == -1:
+            return
+        # chenge out of bounds flag for relevent tile and reset everything else
+        self.field.field[x][y].reset()
+        self.field.field[x][y].outOfBounds = not self.field.field[x][y].outOfBounds
+
+    # this method finds all theoretical walls
+    def setWalls(self):
+        pass
+
+    # this methode changes the goal from a tile the courser is on
+    def setGoal(self):
+        # get courser position
+        (x, y) = self.position()
+        # check the position is valid if not just do nothing
+        if x == -1:
+            return
+        self.field.field[x][y].goal = not self.field.field[x][y].goal
+
+    # this methode changes the start from a tile the courser is on
+    def setSafe(self):
+        # get courser position
+        (x, y) = self.position()
+        # check the position is valid if not just do nothing
+        if x == -1:
+            return
+        self.field.field[x][y].safe = not self.field.field[x][y].safe
+
+    # this method creates a new enemy on the tile the courser is on
+    def createNewEnemy(self):
+        # get courser position
+        (x, y) = self.position()
+        # check the position is valid if not just do nothing
+        if x == -1:
+            return
+        # find starting pixel of tile and find middle
+        (pixelX, pixelY) = self.field.field[x][y].pixelPos
+        (pixelX, pixelY) = (pixelX + self.tileSize // 2, pixelY + self.tileSize // 2)
+        # create enemy at position
+        self.field.enemy.append(Enemy(pixelX, pixelY, self.enemyRadius, self.enemySpeed, self.enemyColor))
+        # reset last enemy aims
+        self.lastEnemyAims = []
+
+    # this method adds a movement point for the last enemy on the tile the courser is on
+    def addMovementPoint(self):
+        # get courser position
+        (x, y) = self.position()
+        # check the position is valid if not just do nothing
+        if x == -1:
+            return
+        # check if at least one enemy exists
+        if len(self.field.enemy) == 0:
+            return
+        # find starting pixel of tile and find middle
+        (pixelX, pixelY) = self.field.field[x][y].pixelPos
+        (pixelX, pixelY) = (pixelX + self.tileSize // 2, pixelY + self.tileSize // 2)
+        # append to last enemy movement point
+        self.field.enemy[-1].addMovementPoint(pixelX, pixelY)
+        # create inter enemy for aims in lighter color
+        # half all color vals
+        newCol = tuple(np.add(self.enemyColor,np.multiply(np.subtract((255,255,255),self.enemyColor), 0.5)).astype(int))
+        self.lastEnemyAims.append(Enemy(pixelX, pixelY,self.enemyRadius,self.enemySpeed, newCol))
+
+    # this method returns the indices on which the mouse courser is on
+    # return (xIdx, yIdx) if it is invalid return (-1, -1)
+    def position(self):
+        # get pixel position relative to the display
+        (x, y) = pygame.mouse.get_pos()
+        # calculate which tile in the matrix the courser is on
+        xIdx = (x - self.xOff) // self.tileSize
+        yIdx = (y - self.yOff) // self.tileSize
+        # verify that the courser is in a valid position
+        if xIdx <= 0 or yIdx <= 0 or xIdx >= self.numberOfTilesWidth - 1 or yIdx >= self.numberOfTilesHeight - 1:
+            return -1, -1
+        return xIdx, yIdx
     # TODO all this
     # plan for editor:
     # first init a field of playable tiles width = 20 height = 10
