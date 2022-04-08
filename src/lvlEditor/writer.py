@@ -153,8 +153,9 @@ class Writer:
         # iterate over all tiles
         for idx, tiles in enumerate(self.field.field):
             for jdy, tile in enumerate(tiles):
-                # create the tile object
-                tileString = f'\t\tself.field.field[{idx}][{jdy}] = Tile({idx}, {jdy}, self.tileSize, self.xStart, self.yStart)\n'
+                tileString = ''
+                # FIXME create the tile object maybe not needed
+                # tileString = f'\t\tself.field.field[{idx}][{jdy}] = Tile({idx}, {jdy}, self.tileSize, self.xStart, self.yStart)\n'
                 # fill the tile object with the right parameters
                 if tile.safe:
                     tileString += f'\t\tself.field.field[{idx}][{jdy}].safe = True\n'

@@ -16,8 +16,11 @@ class Field:
         self.width = width
         self.height = height
         self.enemyRadius = tileSize * 0.3  # defines the radius of an enemy as 1/3 of the tileSize
-        self.field = [[None] * height] * width  # list of list that keeps track of all tiles as field[x][y]
+        self.field = [[None]*height for _ in range(width)]  # list of list that keeps track of all tiles as field[x][y]
         self.enemy = []  # list that keeps track of all enemies
+        # initialize field
+        self.initTiles()
+        print("finished init")
 
     # define draw function
     def draw(self, screen):
@@ -34,7 +37,14 @@ class Field:
         for x in self.enemy:
             x.move()
 
-
-
-
-
+    # this method initializes all tiles
+    # the outermost tiles as outOfBounds
+    def initTiles(self):
+        # iterate over all possible tiles
+        for i in range(0, self.width):
+            for j in range(0, self.height):
+                # create tile
+                self.field[i][j] = Tile(i, j, self.tileSize, self.x, self.y)
+                # if outermost tile set outOfBounds
+                if i == 0 or j == 0 or i == self.width - 1 or j == self.height - 1:
+                    self.field[i][j].outOfBounds = True
