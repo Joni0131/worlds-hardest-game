@@ -9,7 +9,7 @@ from time import sleep
 
 class Editor:
 
-    def __init__(self, screenWidth=-1, screenHeight=-1, xOff=-1, yOff=-1, numberOfPlayableTilesWidth=20, numberOfPlayableTilesHeight=10, tileSize=50, enemySpeed=5, enemyColor=(0, 0, 255)):
+    def __init__(self, screenWidth=-1, screenHeight=-1, xOff=-1, yOff=-1, numberOfPlayableTilesWidth=20, numberOfPlayableTilesHeight=10, tileSize=50, enemySpeed=10, enemyColor=(0, 0, 255)):
         # check that the field has a minimum of 2 tiles and the tile is at least 9*9 pixel
         if not (numberOfPlayableTilesWidth > 0 and numberOfPlayableTilesHeight > 0 and tileSize > 9 and numberOfPlayableTilesHeight * numberOfPlayableTilesWidth >= 2):
             raise Exception('Invalid field sizes.')

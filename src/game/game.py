@@ -1,11 +1,112 @@
 import pygame
-
+import os
+import sys
+import importlib
+import inspect
 from player import Player
 from enemy import Enemy
 from field import Field
+from time import sleep
 
-# TODO make a wrapper class / script for the game itself and a new one for the lvl choosing can be moved back
 
+# IDEA make a new class for the lvl choosing
+class Game:
+
+    def __init__(self, lvlName):
+        # verify types
+        if not isinstance(lvlName, str):
+            raise TypeError('Expected str; got %s' % type(lvlName).__name__)
+        # check if it is a valid lvlName
+        if not self.validFileName(lvlName):
+            raise Exception('The level name %s is not valid.' % type(lvlName).__name__)
+        # check if lvl exists
+        self.lvlPath = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, ("lvl/" + lvlName + ".py"))
+        # if the file doesn't exist raise exception
+        if not os.path.exists(self.lvlPath):
+            raise Exception('The lvl %s doesn\'t exist.' % lvlName)
+        # if the lvl exists safe lvl name
+        self.lvlName = lvlName
+        # set relative module name valid to do only in the project
+        self.modulePath = 'worlds_hardest_game.lvl'
+        # import the lvl file
+        self.importLvl = importlib.import_module('.'+self.lvlName, self.modulePath)
+        # build the lvl class name and functionality
+        self.lvlClassName = self.lvlName[0].upper() + self.lvlName[1::]
+        # create the right class object so it can be used
+        self.lvlClass = getattr(self.importLvl, self.lvlClassName)
+        # create lvl instance
+        self.lvl = self.lvlClass()
+        # create empty variables for font and screen
+        self.font = None
+        self.screen = None
+        # start the game screen
+        self.initGame()
+
+    @staticmethod
+    def validFileName(name):
+        # list off illegal characters as well as - and .
+        illegalChars = ['#', '%', '&', '{', '}', '\\', '<', '>', '*', '?', '/', ' ', '$', '!',
+                        '\'', '\"', ':', '@', '+', '`', '|', '=', '-', '.']
+        # iterate over all illegal chas and check if any is part of the name
+        for char in illegalChars:
+            if char in name:
+                print(f"The character {char} is not allowed to be part of the fileName")
+                return False
+        # check that the file name starts with a lower case character
+        if not name[0].islower():
+            print("The first character has to be lower case")
+            return False
+        return True
+
+    # this method initiate the game
+    def initGame(self):
+        # start pygame
+        pygame.init()
+        # IDEA later add Deathcounter below has to increase the size
+        # start the screen
+        self.screen = pygame.display.set_mode((self.lvl.windowWidth, self.lvl.windowHeight))
+        # set font
+        self.font = pygame.font.Font('freesansbold.ttf', 15)
+        # call running
+        self.running()
+        # stop pygame
+        pygame.quit()
+
+    # this methods handles all the game interactions
+    def running(self):
+        # set roughly the speed for the game in frames per second
+        fps = 30
+        # calculate how long to wait by dividing 1000 ms / fps because function needs int round it
+        delay = int(1000 / fps)
+        running = True
+        # keep the editor running until the save mode has been accessed
+        while running:
+            # add a pygame delay so the game is not always updating
+            pygame.time.delay(delay)
+            # draw everything
+            self.draw()
+            # FIXME wait 10s for debugging
+            # sleep(1)
+            # update all objects
+            self.update()
+            # TODO fix key inputs for debugging just option to close the window
+            events = pygame.event.get()
+            for event in events:
+                # detect if window has been closed
+                if event.type == pygame.QUIT:
+                    running = False
+
+    # this method draws the screen
+    def draw(self):
+        self.lvl.field.draw(self.screen)
+        pygame.display.update()
+
+    # this method updates everything
+    def update(self):
+        self.lvl.field.move()
+
+g = Game('lvlTest')
+sys.exit()
 pygame.init()
 
 SCREEN_WIDTH = 800

@@ -62,17 +62,22 @@ class Enemy:
         if len(self.aimPoints) == 1:
             return
         # if the enemy reached the aim position switch the aim positions and update the next velocity
-        if self.pos == self.aimPoints[0]:
-            self.aimPoints.append(self.aimPoints.pop(self.aimPoints.index(0)))
-            self.velocitiesToPoint.append(self.velocitiesToPoint.pop(self.velocitiesToPoint.index(0)))
+        if self.pos == self.aimPoints[1]:
+            self.aimPoints.append(self.aimPoints.pop(0))
+            self.velocitiesToPoint.append(self.velocitiesToPoint.pop(0))
             # by returning we make sure it stops shortly at the aim
             return
         # now we calculate the next position by simply adding the velocity vector on top
         newPos = np.add(self.pos, self.velocitiesToPoint[0])
         # calculate the difference to the aim if it is smaller than speed/2 we are the closet possible to the aim
         # so we set the new position to the aim
-        (diffX, diffY) = tuple(np.subtract(self.aimPoints[0], newPos))
-        if self.toleranceWindow * -1 < diffX <= self.toleranceWindow or self.toleranceWindow * -1 < diffY <= self.toleranceWindow:
-            self.pos = self.aimPoints[0]
+        (diffX, diffY) = tuple(np.subtract(self.aimPoints[1], newPos))
+        if self.toleranceWindow * -1 < diffX <= self.toleranceWindow and self.toleranceWindow * -1 < diffY <= self.toleranceWindow:
+            self.pos = self.aimPoints[1]
+        elif self.toleranceWindow * -1 < diffX <= self.toleranceWindow:
+            self.pos = (self.aimPoints[0][0], tuple(newPos)[1])
+        elif self.toleranceWindow * -1 < diffY <= self.toleranceWindow:
+            self.pos = (tuple(newPos)[0], self.aimPoints[0][1])
         else:
             self.pos = tuple(newPos)
+        return
