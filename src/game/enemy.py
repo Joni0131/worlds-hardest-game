@@ -13,11 +13,13 @@ class Enemy:
         self.velocitiesToPoint = [(0, 0)]  # list of speed vectors as [(velx1, vely1), (velx2, vely2)] ...
         # the initial velocity is (0, 0) because it doesn't move
         self.toleranceWindow = speed // 2  # this is the tolerance for reaching the aim
+        # save the collision object
+        self.object = None
 
     # draw the enemy at the current position
     def draw(self, screen):
-        # first draw the line around the enemy in black
-        pygame.draw.circle(screen, 0, self.pos, self.radius, 3)
+        # first draw the line around the enemy in black and this is the collision box as well
+        self.object = pygame.draw.circle(screen, 0, self.pos, self.radius, 3)
         # second fill the inner with the enemy color
         pygame.draw.circle(screen, self.color, self.pos, self.radius - 3)
 

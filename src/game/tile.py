@@ -12,20 +12,22 @@ class Tile:
         self.outOfBounds = False
         self.edges = [False, False, False, False]  # Defined as Flags as [N, E, S, W]
         self.wall = False
+        # create collision box
+        self.object = None
 
     def draw(self, screen):
         # IDEA optimize with return and order
         # iterate over all tiles so the color is alternating
         if sum(self.matPos) % 2 == 0:
-            pg.draw.rect(screen, (247, 247, 255), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+            self.object = pg.draw.rect(screen, (247, 247, 255), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
         else:
-            pg.draw.rect(screen, (230, 230, 255), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+            self.object = pg.draw.rect(screen, (230, 230, 255), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
         # set color for safe areas
         if self.safe or self.goal:
-            pg.draw.rect(screen, (181, 254, 180), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+            self.object = pg.draw.rect(screen, (181, 254, 180), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
         # set color for out of bounds
         if self.outOfBounds:
-            pg.draw.rect(screen, (180, 181, 254), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+            self.object = pg.draw.rect(screen, (180, 181, 254), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
         # if it is a wall draw them as well
         if self.wall:
             self.drawEdges(screen)
