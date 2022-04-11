@@ -17,6 +17,8 @@ class LvlTest:
 		self.field = Field(self.xStart, self.yStart, self.numberOfTilesWidth, self.numberOfTilesHeight, self.tileSize, self.enemyColor)
 		self.fillTiles()
 		self.fillEnemies()
+		self.playerStartingPos = (163, 163)
+		self.playerSize = 25
 
 	def fillTiles(self):
 		self.field.field[0][0].outOfBounds = True
@@ -397,4 +399,3 @@ class LvlTest:
 
 	def draw(self, screen):
 		self.field.draw(screen)
-

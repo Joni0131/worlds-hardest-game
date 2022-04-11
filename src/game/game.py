@@ -12,7 +12,7 @@ from time import sleep
 # IDEA make a new class for the lvl choosing
 class Game:
 
-    def __init__(self, lvlName):
+    def __init__(self, lvlName, humanPlayer=True ):
         # verify types
         if not isinstance(lvlName, str):
             raise TypeError('Expected str; got %s' % type(lvlName).__name__)
@@ -36,9 +36,13 @@ class Game:
         self.lvlClass = getattr(self.importLvl, self.lvlClassName)
         # create lvl instance
         self.lvl = self.lvlClass()
-        # create empty variables for font and screen
+        # check if human player
+        self.humanPlayer = humanPlayer
+        # create empty variables for font and screen and players, and for all goal objects
         self.font = None
         self.screen = None
+        self.players = []
+        self.goals = []
         # start the game screen
         self.initGame()
 
@@ -67,13 +71,25 @@ class Game:
         self.screen = pygame.display.set_mode((self.lvl.windowWidth, self.lvl.windowHeight))
         # set font
         self.font = pygame.font.Font('freesansbold.ttf', 15)
-        # call running
-        self.running()
+        # draw first time
+        self.draw()
+        # safe all goal tiles
+        for colum in self.lvl.field.field:
+            for tile in colum:
+                if tile.goal:
+                    self.goals.append(tile.object)
+        # initiate player and difference for human and genetic
+        if self.humanPlayer:
+            self.players.append(Player(list(self.lvl.playerStartingPos), self.lvl.playerSize))
+            self.runningHuman()
+        else:
+            # TODO make multiple players
+            self.runningAI()
         # stop pygame
         pygame.quit()
 
     # this methods handles all the game interactions
-    def running(self):
+    def runningHuman(self):
         # set roughly the speed for the game in frames per second
         fps = 30
         # calculate how long to wait by dividing 1000 ms / fps because function needs int round it
@@ -88,22 +104,68 @@ class Game:
             # FIXME wait 10s for debugging
             # sleep(1)
             # update all objects
-            self.update()
+            running = self.update()
             # TODO fix key inputs for debugging just option to close the window
-            events = pygame.event.get()
-            for event in events:
-                # detect if window has been closed
-                if event.type == pygame.QUIT:
-                    running = False
 
     # this method draws the screen
     def draw(self):
+        self.screen.fill((183, 175, 250))
         self.lvl.field.draw(self.screen)
+        for player in self.players:
+            player.draw(self.screen)
         pygame.display.update()
 
     # this method updates everything
     def update(self):
         self.lvl.field.move()
+        events = pygame.event.get()
+        for event in events:
+            # detect if window has been closed
+            if event.type == pygame.QUIT:
+                return False
+        # get all down pressed keys
+        keys = pygame.key.get_pressed()
+        # update the player
+        self.players[0].moveHuman(keys, self.screen, self.lvl.field)
+        # check for collision
+        if self.collision():
+            return False
+        return True
+
+    # this method checks for collision with enemies and the goal
+    def collision(self):
+        collision = [False] * len(self.players)
+        # list enemy objects
+        enemies = list(map(lambda x: x.object, self.lvl.field.enemy))
+        # check if collision with enemy
+        for idx, player in enumerate(self.players):
+            if player.object.collidelist(enemies) != -1:
+                print("You died.")
+                player.reset()
+                collision[idx] = True
+        # if all players collided reset lvl
+        if all(collision):
+            self.lvl = self.lvlClass()
+            self.goals = []
+            self.draw()
+            # safe all goal tiles just in cas
+            for colum in self.lvl.field.field:
+                for tile in colum:
+                    if tile.goal:
+                        self.goals.append(tile.object)
+            return False
+        # check if any player reached the goal
+        for idx, player in enumerate(self.players):
+            if player.object.collidelist(self.goals) != -1:
+                print("Reached goal")
+                print(f'Player died {player.deaths} times.')
+                player.goal = True
+                collision[idx] = True
+                return True
+
+    # TODO implement later
+    def runningAI(self):
+        pass
 
 g = Game('lvlTest')
 sys.exit()

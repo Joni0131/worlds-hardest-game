@@ -9,7 +9,7 @@ class Writer:
 
     # the writer only needs a lvl name and a field that has to be recorded
     # py having a keywordArgument we make sure field is an instance of the class Field
-    def __init__(self, lvlName: str, field: Field, windowWidth: int, windowHeight: int):
+    def __init__(self, lvlName: str, field: Field, windowWidth: int, windowHeight: int, playerStartingPos: (int, int), playerSize):
         # verify types
         if not isinstance(lvlName, str):
             raise TypeError('Expected str; got %s' % type(lvlName).__name__)
@@ -19,12 +19,16 @@ class Writer:
             raise TypeError('Expected int; got %s' % type(windowWidth).__name__)
         if not isinstance(windowHeight, int):
             raise TypeError('Expected int; got %s' % type(windowHeight).__name__)
+        if not isinstance(playerStartingPos, tuple):
+            raise TypeError('Expected (int, int); got %s' % type(playerStartingPos).__name__)
         self.lvlName = lvlName
         # define path relative to this module
         self.filePath = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, ("lvl/" + self.lvlName + ".py"))
         self.field = field
         self.windowWidth = windowWidth
         self.windowHeight = windowHeight
+        self.playerStartingPos = playerStartingPos
+        self.playerSize = playerSize
         # start the writing process
         self.prepareField()
 
@@ -141,6 +145,10 @@ class Writer:
         initFuncString += '\t\tself.fillTiles()\n'
         # call add enemies
         initFuncString += '\t\tself.fillEnemies()\n'
+        # set the player starting position
+        initFuncString += f'\t\tself.playerStartingPos = {self.playerStartingPos}\n'
+        # set the player starting position
+        initFuncString += f'\t\tself.playerSize = {self.playerSize}\n'
         # append one more lin so it matches convention
         initFuncString += '\n'
         # now write all prepared strings to the file and continue with the next

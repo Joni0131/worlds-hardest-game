@@ -2,6 +2,7 @@ import pygame
 from worlds_hardest_game.src.game.field import Field
 from worlds_hardest_game.src.game.enemy import Enemy
 from worlds_hardest_game.src.lvlEditor.writer import Writer
+from worlds_hardest_game.src.game.player import Player
 import numpy as np
 import stringFormat
 from time import sleep
@@ -50,13 +51,15 @@ class Editor:
         # set number of created tiles
         self.numberOfTilesWidth = numberOfPlayableTilesWidth + 2
         self.numberOfTilesHeight = numberOfPlayableTilesHeight + 2
-        # prepare empty variable for screen, font, modes, modeText, field, lastEnemyAims
+        # prepare empty variable for screen, font, modes, modeText, field, lastEnemyAims, player, playerLocation
         self.screen = None
         self.font = None
         self.modes = []
         self.modeText = None
         self.field = None
         self.lastEnemyAims = []
+        self.playerLocation = None
+        self.player = None
         # start the editor
         self.startEditor()
 
@@ -84,6 +87,9 @@ class Editor:
         # draw last movementpoints of an enemy
         for i in self.lastEnemyAims:
             i.draw(self.screen)
+        # only try to draw player if it is created
+        if not self.player is None:
+            self.player.draw(self.screen)
         # update screen
         pygame.display.update()
 
@@ -185,6 +191,8 @@ class Editor:
         self.modes.append(('EnemyMovement', pygame.K_m))
         # append save
         self.modes.append(('Save', pygame.K_s))
+        # set player starting location
+        self.modes.append(('PlayerStart', pygame.K_p))
 
     # this method handles the different mode functionalities
     def running(self):
@@ -250,6 +258,11 @@ class Editor:
                 if click:
                     # IDEA do this and draw a enemy on the point with a alpha value not trivial only surface object has alpha value
                     self.addMovementPoint()
+            # add playerStarting pos
+            elif currentMode == self.modes[7][1]:
+                # only on click:
+                if click:
+                    self.setPlayer()
             # if nothing or something unexpected happened don't draw
             else:
                 continue
@@ -384,7 +397,24 @@ class Editor:
     def safeFile(self):
         print("Please input level name.")
         lvlName = input()
-        Writer(lvlName, self.field, self.screenWidth, self.screenHeight)
+        Writer(lvlName, self.field, self.screenWidth, self.screenHeight, self.playerLocation, self.player.size)
+
+    # this method sets the players starting location
+    def setPlayer(self):
+        if self.playerLocation is None:
+            (x, y) = self.position()
+            # check the position is valid if not just do nothing
+            if x == -1:
+                return
+            # find starting pixel of tile and find middle
+            (pixelX, pixelY) = self.field.field[x][y].pixelPos
+            (pixelX, pixelY) = (pixelX + self.tileSize // 2, pixelY + self.tileSize // 2)
+            # define playerSize
+            playerSize = self.tileSize // 2
+            # create player at position
+            self.player = Player((pixelX - playerSize // 2, pixelY - playerSize // 2), playerSize)
+            # safe player location
+            self.playerLocation = self.player.initPos
 
     # plan for editor:
     # first init a field of playable tiles width = 20 height = 10

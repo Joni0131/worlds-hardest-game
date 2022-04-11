@@ -1,3 +1,4 @@
+import pygame
 import pygame as pg
 
 
@@ -17,17 +18,19 @@ class Tile:
 
     def draw(self, screen):
         # IDEA optimize with return and order
+        # create Rect
+        self.object = pygame.Rect(self.pixelPos[0], self.pixelPos[1], self.size, self.size)
         # iterate over all tiles so the color is alternating
         if sum(self.matPos) % 2 == 0:
-            self.object = pg.draw.rect(screen, (247, 247, 255), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+            pg.draw.rect(screen, (247, 247, 255), self.object)
         else:
-            self.object = pg.draw.rect(screen, (230, 230, 255), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+            self.object = pg.draw.rect(screen, (230, 230, 255), self.object)
         # set color for safe areas
         if self.safe or self.goal:
-            self.object = pg.draw.rect(screen, (181, 254, 180), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+            self.object = pg.draw.rect(screen, (181, 254, 180), self.object)
         # set color for out of bounds
         if self.outOfBounds:
-            self.object = pg.draw.rect(screen, (180, 181, 254), (self.pixelPos[0], self.pixelPos[1], self.size, self.size))
+            self.object = pg.draw.rect(screen, (180, 181, 254), self.object)
         # if it is a wall draw them as well
         if self.wall:
             self.drawEdges(screen)
