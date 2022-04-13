@@ -101,11 +101,8 @@ class Game:
             pygame.time.delay(delay)
             # draw everything
             self.draw()
-            # FIXME wait 10s for debugging
-            # sleep(1)
             # update all objects
             running = self.update()
-            # TODO fix key inputs for debugging just option to close the window
 
     # this method draws the screen
     def draw(self):

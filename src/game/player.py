@@ -2,6 +2,7 @@ import pygame
 from worlds_hardest_game.src.game.field import Field
 import numpy as np
 
+
 class Player:
     def __init__(self, pos: [int, int], size, speed=5, color=(255, 0, 0), deaths=0):
         # safe the start position and current
@@ -34,8 +35,16 @@ class Player:
         self.draw(screen)
 
     # this method handles the AI movement
-    def moveAI(self, keys):
-        pass
+    def moveAI(self, keys, screen, field):
+        # calculate new xcoordinate
+        self.currentPos[0] += keys[0]
+        # calcualte new y coordinate
+        self.currentPos[1] += keys[1]
+        # draw the interims' player for in bound forcing
+        self.draw(screen)
+        # check if valid movement
+        self.forceInBounds(field)
+        self.draw(screen)
 
     def draw(self, screen):
         # use the drawn boarder as a collision boy
@@ -56,7 +65,6 @@ class Player:
     #   *---*
     # SW     SE
     def forceInBounds(self, field: Field):
-        # TODO implement method use check three corners of player to calculate which wall it it and force back in boundary
         # calculate the center of the player and the corresponding tile indices
         centerPixel = np.add(self.currentPos, self.size // 2)
         (centerMatrixX, centerMatrixY) = np.subtract(centerPixel, (field.x, field.y)) // field.tileSize
