@@ -55,7 +55,7 @@ class Creature():
         # safe the new movement
         # if it is completly new append it else exchange it
         if start is None:
-            self.movements.append(idx)
+            self.movements.append(inter)
             return
         self.movements[idx] = inter
 
@@ -63,14 +63,9 @@ class Creature():
     def move(self, screen, field):
         # check if it exceeds the maxMovements
         if self.currentMove >= self.maxMoveNumber:
-            # now calculate the fitness
-            self.calcFitness()
             return False
         # if the player already died no more movements
         if self.player.death != 0:
-            if self.calcFitness() != 0:
-                return False
-            self.calcFitness()
             return False
         # send the next move to the player
         self.player.moveAI(self.movements[self.currentMove], screen, field)
