@@ -50,6 +50,7 @@ class Game:
         self.players = []
         self.goals = []
         self.population = None
+        self.stop = False
         # start the game screen
         self.initGame()
 
@@ -186,7 +187,7 @@ class Game:
         # the generation finished
         self.population.calcFitness()
         # check if the maximum gernerations have been reached
-        if self.population.currentGeneration < self.population.maxGeneration:
+        if not self.stop and self.population.currentGeneration < self.population.maxGeneration:
             # finished n-th population
             print(f'Finished {self.population.currentGeneration}-th generation.')
             # reset the field
@@ -202,8 +203,10 @@ class Game:
             self.population.newGeneration()
             # rerun running
             return self.runningAI()
-        # reached 100 populations
-        print("Reached Population limit")
+        if self.stop:
+            print("User stopped the program.")
+        else:
+            print("Reached Population limit")
 
     # this method draws everything for the ai
     def drawAI(self):
@@ -220,6 +223,7 @@ class Game:
         for event in events:
             # detect if window has been closed
             if event.type == pygame.QUIT:
+                self.stop = True
                 return False
         # move all creatures
         result = self.population.move(self.screen)
