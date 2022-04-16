@@ -65,7 +65,7 @@ class Creature():
         if self.currentMove >= self.maxMoveNumber:
             return False
         # if the player already died no more movements
-        if self.player.death != 0:
+        if self.player.deaths != 0:
             return False
         # send the next move to the player
         self.player.moveAI(self.movements[self.currentMove], screen, field)
@@ -85,23 +85,14 @@ class Creature():
             # calculate the distance
             distance = np.linalg.norm(np.array(self.goalCoord) - np.array(center))
             # if the player died of course the fitness has to be worse then if it survieved
-            if self.player.death != 0:
+            if self.player.deaths != 0:
                 distance += 0.9
             self.fitness = 1 / (distance ** 2)
         # square the fitness so small changes are seen bigger
         self.fitness *= self.fitness
 
-    # FIXME check if really necessary in the end
-    # this method uses the same player again and resets all movement and sets new
-    def reset(self, movement, maxMoves):
-        self.movements = movement
-        self.maxMoveNumber = maxMoves
-        self.currentMove = 0
-        self.fitness = 0
-        self.player.reset()
-        self.player.death = 0
-        self.calculateAllMovements()
-
     # this method is just a interface to the underlying draw method
     def draw(self, screen):
+        if self.player.deaths != 0:
+            return
         self.player.draw(screen)

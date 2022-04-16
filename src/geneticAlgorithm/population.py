@@ -27,7 +27,7 @@ class Population:
         # create enough new creatures
         for i in range(0, self.populationSize):
             # create a player for the creature from the default player
-            player = Player(self.defaultPlayer.initPos, self.defaultPlayer.size, self.defaultPlayer.speed, self.defaultPlayer.color)
+            player = Player([self.defaultPlayer.initPos[0],self.defaultPlayer.initPos[1]], self.defaultPlayer.size, self.defaultPlayer.speed, self.defaultPlayer.color)
             # create creature
             creature = Creature(self.goalCentroid[0], self.goalCentroid[1], self.moveIncrease, self.defaultPlayer.speed,
                                 self.mutationRate, [], player)
@@ -49,6 +49,10 @@ class Population:
         for creature in self.creatures:
             if best is None or best.fitness < creature.fitness:
                 best = creature
+        # reset best creature
+        best.currentMove = 0
+        best.player.reset()
+        best.player.deaths = 0
         # create enough parent pairs
         for i in range(0, self.populationSize//2,1):
             # choose 2 more or less random parents
@@ -58,13 +62,13 @@ class Population:
         nextGen = []
         # iterate over all parents and generate 2 children with cross over
         for p1, p2 in parentList:
-            newMovementSet = self.reproduce(p1, p2)
+            newMovementSet = self.reproduce(self.creatures[p1], self.creatures[p2])
             # iterate over both movements
             for movement in newMovementSet:
                 # check that population is not too big
                 if len(nextGen) < self.populationSize:
                     # create the player that is moved
-                    player = Player(self.defaultPlayer.initPos, self.defaultPlayer.size, self.defaultPlayer.speed, self.defaultPlayer.color)
+                    player = Player([self.defaultPlayer.initPos[0],self.defaultPlayer.initPos[1]], self.defaultPlayer.size, self.defaultPlayer.speed, self.defaultPlayer.color)
                     # init the new creature
                     nextGen.append(Creature(self.goalCentroid[0], self.goalCentroid[1],
                                             self.moveIncrease * ((self.currentGeneration // 5) + 1), self.defaultPlayer.speed,
@@ -76,11 +80,16 @@ class Population:
         # increase generation count
         self.currentGeneration += 1
 
+    # TODO make crossover point number variable not static at half
     # this method generates a baby from two parents by doing cross over
     def reproduce(self, parent1, parent2):
-        movements = [parent1.movements, parent2.movements]
+        movements = [[],[]]
+        for move in parent1.movements:
+            movements[0].append(move)
+        for move in parent2.movements:
+            movements[1].append(move)
         # swap half the movements
-        movements[0][:len(movements)//2], movements[1][:len(movements)//2] = movements[1][:len(movements)//2], movements[0][:len(movements)//2]
+        movements[0][:len(movements[0])//2], movements[1][:len(movements[0])//2] = movements[1][:len(movements[0])//2], movements[0][:len(movements[0])//2]
         return movements
 
     # this method moves every creature return False once all creatures finished moving
@@ -89,7 +98,7 @@ class Population:
         param = False
         # iterate over all creatures
         for creature in self.creatures:
-            param = param or creature.move(screen, self.field)
+            param = creature.move(screen, self.field) or param
         # return the param
         return param
 
@@ -97,7 +106,7 @@ class Population:
     # returns the index of a selected creature
     def selection(self, numberOfCompares=3):
         # select starting creature randomly
-        startIdx = np.random.randint(0, len(self.creatures), 1)
+        startIdx = np.random.randint(0, len(self.creatures), 1)[0]
         # compare the fitness score of the creature to multiple creatures
         for idx in np.random.randint(0,  len(self.creatures), numberOfCompares):
             # take the better creature

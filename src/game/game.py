@@ -42,7 +42,7 @@ class Game:
         # set default parameters for a population
         self.populationSize = 100
         self.mutationRate = 0.01
-        self.moveIncreasePerFiveRounds = 5
+        self.moveIncreasePerFiveRounds = 30
         self.maxGenerations = 100
         # create empty variables for font and screen and players, and for all goal objects
         self.font = None
@@ -182,17 +182,28 @@ class Game:
             # draw everything
             self.drawAI()
             # update all objects
-            running = self.updateHuman()
+            running = self.updateAI()
         # the generation finished
         self.population.calcFitness()
         # check if the maximum gernerations have been reached
         if self.population.currentGeneration < self.population.maxGeneration:
+            # finished n-th population
+            print(f'Finished {self.population.currentGeneration}-th generation.')
             # reset the field
-            # TODO
+            self.lvl = self.lvlClass()
+            self.goals = []
+            self.drawAI()
+            # safe all goal tiles just in cas
+            for colum in self.lvl.field.field:
+                for tile in colum:
+                    if tile.goal:
+                        self.goals.append(tile.object)
             # gernerat next Gen
             self.population.newGeneration()
             # rerun running
-            self.runningAI()
+            return self.runningAI()
+        # reached 100 populations
+        print("Reached Population limit")
 
     # this method draws everything for the ai
     def drawAI(self):
@@ -200,6 +211,7 @@ class Game:
         self.lvl.field.draw(self.screen)
         self.population.draw(self.screen)
         pygame.display.update()
+        return
 
     # this method updates everything
     def updateAI(self):
@@ -214,38 +226,22 @@ class Game:
         # check for collisions
         self.collisionAI()
         # return result
-        return not result
+        return result
 
     # this method calculates the colsision for the ai
     def collisionAI(self):
-        # TODO refactor for ai
-        collision = [False] * len(self.players)
         # list enemy objects
         enemies = list(map(lambda x: x.object, self.lvl.field.enemy))
         # check if collision with enemy
-        for idx, player in enumerate(self.players):
-            if player.object.collidelist(enemies) != -1:
+        for idx, player in enumerate(self.population.creatures):
+            if player.player.object.collidelist(enemies) != -1:
                 print("You died.")
-                player.reset()
-                collision[idx] = True
-        # if all players collided reset lvl
-        if all(collision):
-            self.lvl = self.lvlClass()
-            self.goals = []
-            self.drawHuman()
-            # safe all goal tiles just in cas
-            for colum in self.lvl.field.field:
-                for tile in colum:
-                    if tile.goal:
-                        self.goals.append(tile.object)
-            return False
+                player.player.reset()
         # check if any player reached the goal
-        for idx, player in enumerate(self.players):
-            if player.object.collidelist(self.goals) != -1:
+        for idx, player in enumerate(self.population.creatures):
+            if player.player.object.collidelist(self.goals) != -1:
                 print("Reached goal")
-                print(f'Player died {player.deaths} times.')
-                player.goal = True
-                collision[idx] = True
-                return True
+                print(f'Player died {player.player.deaths} times.')
+                player.player.goal = True
 
-q = Game('lvlTest')
+q = Game('lvlTest', humanPlayer=False)
