@@ -43,7 +43,7 @@ class Game:
         self.populationSize = 100
         self.mutationRate = 0.01
         self.moveIncreasePerFiveRounds = 30
-        self.maxGenerations = 100
+        self.maxGenerations = 500
         # create empty variables for font and screen and players, and for all goal objects
         self.font = None
         self.screen = None

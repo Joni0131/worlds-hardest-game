@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Player:
-    def __init__(self, pos: [int, int], size, speed=10, color=(255, 0, 0), deaths=0):
+    def __init__(self, pos: [int, int], size, speed=5, color=(255, 0, 0), deaths=0):
         # safe the start position and current
         self.initPos = [pos[0], pos[1]]
         self.currentPos = pos

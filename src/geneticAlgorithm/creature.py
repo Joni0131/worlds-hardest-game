@@ -1,13 +1,16 @@
 import random
 import numpy as np
+from scipy.optimize import minimize
+import scipy.spatial.distance
+import math
 
 
 # this class handels one creature
-class Creature():
-
+class Creature:
     # initilize the creature
-    def __init__(self, goalX, goalY, maxMoveNumber, maxSpeed, mutationRate, initMovement, player):
-        self.goalCoord = [goalX, goalY]
+    def __init__(self, goalX, goalY, field, maxMoveNumber, maxSpeed, mutationRate, initMovement, player):
+        self.goalCoords = [goalX, goalY]
+        self.field = field
         self.maxSpeed = maxSpeed
         self.mutationRate = mutationRate
         self.maxMoveNumber = maxMoveNumber
@@ -18,6 +21,7 @@ class Creature():
         # init fitness parameters
         self.fitness = 0
         self.calculateAllMovements()
+        self.center = []
 
     # calculate all movements
     def calculateAllMovements(self):
@@ -72,6 +76,7 @@ class Creature():
         self.currentMove += 1
         return True
 
+    # TODO change distance calculation to distance to region or something
     # this method calculates the fitness of a creature
     # the function is a derivation of code bullets fitness function
     # https://github.com/Code-Bullet/WorldsHardestGameAI/blob/gh-pages/WHG/Player.js
@@ -81,9 +86,11 @@ class Creature():
             self.fitness = 1.0/16.0 + 10000.0/((self.currentMove-1) ** 2)
         else:
             # calculate the center of the player
-            center = list(np.add(self.player.currentPos, self.player.size // 2))
-            # calculate the distance
-            distance = np.linalg.norm(np.array(self.goalCoord) - np.array(center))
+            self.center = np.add(self.player.currentPos, self.player.size // 2)
+            # calculate the distance by minimizing the function calc distance with the initial guess as the goal centroid
+            parameter = minimize(self.calcDistance, self.goalCoords, method='Nelder-Mead')
+            # use the parameter to calculate the distance
+            distance = self.calcDistance(list(parameter.x))
             # if the player died of course the fitness has to be worse then if it survieved
             if self.player.deaths != 0:
                 distance += 0.9
@@ -96,3 +103,16 @@ class Creature():
         if self.player.deaths != 0:
             return
         self.player.draw(screen)
+
+    # this method defines the distance calculation
+    def calcDistance(self, coordinats):
+        x = coordinats[0]
+        y = coordinats[1]
+        # check if x, y are in the region of the goals by calculating the tile and checking if it is a goal
+        xIdx = (x - self.field.x) // self.field.tileSize
+        yIdx = (y - self.field.y) // self.field.tileSize
+        # check if tile is NOT a goal then the position is invalid
+        if not self.field.field[int(xIdx)][int(yIdx)].goal:
+            return math.inf
+        # calculate the eucleadian distance if valid
+        return scipy.spatial.distance.euclidean([x, y], self.center)

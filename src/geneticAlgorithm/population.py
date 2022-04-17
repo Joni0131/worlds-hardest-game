@@ -29,7 +29,7 @@ class Population:
             # create a player for the creature from the default player
             player = Player([self.defaultPlayer.initPos[0],self.defaultPlayer.initPos[1]], self.defaultPlayer.size, self.defaultPlayer.speed, self.defaultPlayer.color)
             # create creature
-            creature = Creature(self.goalCentroid[0], self.goalCentroid[1], self.moveIncrease, self.defaultPlayer.speed,
+            creature = Creature(self.goalCentroid[0], self.goalCentroid[1], self.field, self.moveIncrease, self.defaultPlayer.speed,
                                 self.mutationRate, [], player)
             # safe the creature
             self.creatures.append(creature)
@@ -70,7 +70,7 @@ class Population:
                     # create the player that is moved
                     player = Player([self.defaultPlayer.initPos[0],self.defaultPlayer.initPos[1]], self.defaultPlayer.size, self.defaultPlayer.speed, self.defaultPlayer.color)
                     # init the new creature
-                    nextGen.append(Creature(self.goalCentroid[0], self.goalCentroid[1],
+                    nextGen.append(Creature(self.goalCentroid[0], self.goalCentroid[1], self.field,
                                             self.moveIncrease * ((self.currentGeneration // 5) + 1), self.defaultPlayer.speed,
                                             self.mutationRate, movement, player))
         # to not lose the best from last gen copy it to the new gen
